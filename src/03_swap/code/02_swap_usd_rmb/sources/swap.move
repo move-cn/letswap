@@ -7,7 +7,8 @@ module swap::swap {
     use sui::tx_context::TxContext;
     use coin_owner::usd::USD;
     use coin_owner::rmb::RMB;
-    struct Bank has key {
+
+    public struct Bank has key {
         id: UID,
         rmb: Balance<USD>,
         usd:Balance<RMB>
@@ -15,14 +16,12 @@ module swap::swap {
 
 
 
-
-
-
-
-    public  fun swap_rmb_usd(bank: &mut Bank,rmb :Coin<RMB>,ctx:&mut TxContext):Coin<USD>{
-        ///
+    public  fun swap_rmb_usd(bank: &mut Bank,rmb :Coin<RMB>,ctx:&mut TxContext): Coin<USD>{
         balance::join(&mut bank.rmb, coin::into_balance(rmb));
         let usd_balance = balance::split(&mut bank.usd, 1000);
         coin::from_balance(usd_balance, ctx)
     }
+
+
+
 }

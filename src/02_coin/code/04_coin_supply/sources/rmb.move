@@ -10,10 +10,10 @@ module coin_demo::rmb {
     use sui::transfer::{transfer, public_transfer};
     use sui::tx_context::{Self, TxContext, sender};
 
-    struct RMB has drop {}
+    public struct RMB has drop {}
 
 
-    struct SupplyHold has key {
+    public struct SupplyHold has key {
         id: UID,
         supply: Supply<RMB>
     }
@@ -34,8 +34,6 @@ module coin_demo::rmb {
     }
 
     public fun mint(sup: &mut SupplyHold, amount: u64, ctx: &mut TxContext): Coin<RMB> {
-
-
 
         let rmbBalance = balance::increase_supply(&mut sup.supply, amount);
         coin::from_balance(rmbBalance, ctx)

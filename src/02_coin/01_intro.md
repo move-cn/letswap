@@ -6,14 +6,14 @@ Coin是Sui上的标准代币协议
 [Coin](https://github.com/MystenLabs/sui/blob/main/crates/sui-framework/packages/sui-framework/sources/coin.move#L26)
 ```rust
     /// A coin of type `T` worth `value`. Transferable and storable
-    struct Coin<phantom T> has key, store {
+    public struct Coin<phantom T> has key, store {
         id: UID,
         balance: Balance<T>
     }
 ```
 `Coin` 内部有一个 `id` 字段表面是一个对象，只有一个 类型为 `Balance` 的字段 我们把 `Balance`的源码也放出来
 ```rust
-    struct Balance<phantom T> has store {
+    public struct Balance<phantom T> has store {
         value: u64
     }
 ```

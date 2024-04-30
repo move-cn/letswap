@@ -11,10 +11,10 @@ module coin_lock::lock_coin {
 
     const ErrNotRelease :u64 = 0x00001;
 
-    struct USD has drop {}
+    public struct USD has drop {}
 
 
-    struct LockCoin has key {
+    public struct LockCoin has key {
         id: UID,
         balance: Balance<USD>,
         release_time: u64
@@ -49,10 +49,8 @@ module coin_lock::lock_coin {
 
     public entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
 
-        //
-
         let current_ms = tx_context::epoch_timestamp_ms(ctx);
-        assert!(current_ms > lock_coin.release_time,ErrNotRelease);
+        assert!(current_ms > lock_coin.release_time, ErrNotRelease);
         let LockCoin  { id,balance,release_time:_ }= lock_coin;
         object::delete(id);
     }

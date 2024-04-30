@@ -13,20 +13,20 @@ module coin_demo::usd {
     const ErrNotLt100: u64 = 0x0001;
 
 
-    struct USD has drop {}
+    public struct USD has drop {}
 
 
-    struct USDSupply has key {
+    public struct USDSupply has key {
         id: UID,
         supply: Supply<USD>
     }
 
-    struct AdminCap has key, store {
+    public struct AdminCap has key, store {
         id: UID
     }
 
 
-    struct USDMintCap has key, store {
+    public struct USDMintCap has key, store {
         id: UID
     }
 
