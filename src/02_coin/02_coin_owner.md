@@ -62,3 +62,5 @@ module coin_owner::usd {
 ```shell
 sui client publish --gas-budget 100000000 
 ```
+
+

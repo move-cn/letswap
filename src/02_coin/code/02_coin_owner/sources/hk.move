@@ -6,7 +6,9 @@ module coin_owner::hk {
     use sui::transfer;
 
     public struct HK has drop {}
+
     const SendAddress: address = @0x01;
+
     fun init(hk: HK, ctx: &mut TxContext) {
 
 

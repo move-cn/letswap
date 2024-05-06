@@ -23,6 +23,7 @@ module swap::swap {
 
 
     fun init(ctx: &mut TxContext) {
+
         let bank = Bank {
             id: object::new(ctx),
             rmb: balance::zero<>(),
@@ -38,20 +39,55 @@ module swap::swap {
 
 
 
-    public entry fun deposit(){
-
+    public entry fun deposit_rmb(bank:&mut Bank,rmb:Coin<RMB>,_:&mut TxContext){
+        let rmb_balance = coin::into_balance(rmb);
+        balance::join(&mut bank.rmb,rmb_balance);
     }
 
-    public entry fun withdraw(){
+    public entry fun deposit_usd(bank:&mut Bank,usd:Coin<USD>,_:&mut TxContext){
+        let usd_balance = coin::into_balance(usd);
+        balance::join(&mut bank.usd,usd_balance);
+    }
 
+    public entry fun withdraw_rmb(_:&AdminCap, bank:&mut Bank,amt:u64,ctx:&mut TxContext){
+        let  rmb_balance = balance::split(&mut bank.rmb,amt);
+        let rmb = coin::from_balance(rmb_balance,ctx);
+        public_transfer(rmb,sender(ctx));
     }
 
 
-
+    /// 1 usd = 1 rmb
     public entry fun swap_rmb_usd(bank: &mut Bank, rmb: Coin<RMB>, ctx: &mut TxContext) {
+        let amt = coin::value(&rmb);
+
         balance::join(&mut bank.rmb, coin::into_balance(rmb));
-        let usd_balance = balance::split(&mut bank.usd, 1000);
+
+
+        let amt_usd = amt * 10000 / 73000 ;
+
+
+        let usd_balance = balance::split(&mut bank.usd, amt_usd);
+
+
         let usd = coin::from_balance(usd_balance, ctx);
+
         public_transfer(usd, sender(ctx));
     }
+
+    public entry fun swap_usd_rmb(bank: &mut Bank, usd: Coin<USD>, ctx: &mut TxContext) {
+        let amt = coin::value(&usd);
+
+        balance::join(&mut bank.usd, coin::into_balance(usd));
+
+
+        let amt_rmb = amt * 73000 / 10000;
+
+
+        let rmb_balance = balance::split(&mut bank.rmb, amt_rmb);
+
+        let rmb = coin::from_balance(rmb_balance, ctx);
+
+        public_transfer(rmb, sender(ctx));
+    }
+
 }
