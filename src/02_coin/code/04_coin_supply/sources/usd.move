@@ -1,4 +1,4 @@
-module coin_demo::usd {
+module coin_supply::usd {
     use std::option;
     use sui::balance;
     use sui::balance::Supply;
@@ -44,7 +44,7 @@ module coin_demo::usd {
     }
 
 
-    public fun give_cap(_: AdminCap, to: address, ctx: &mut TxContext) {
+    public fun give_cap(_: &AdminCap, to: address, ctx: &mut TxContext) {
         transfer::public_transfer(USDMintCap {
             id: object::new(ctx)
         }, to);
@@ -59,7 +59,7 @@ module coin_demo::usd {
 
 
 
-    public fun mint_cap(_: USDMintCap, usd: &mut USDSupply, amount: u64, ctx: &mut TxContext): Coin<USD> {
+    public fun mint_cap(_: &mut USDMintCap, usd: &mut USDSupply, amount: u64, ctx: &mut TxContext): Coin<USD> {
         let usdBalance = balance::increase_supply(&mut usd.supply, amount);
         coin::from_balance(usdBalance, ctx)
     }
