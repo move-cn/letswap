@@ -37,7 +37,10 @@ module swap_rmb_usd::swap_rmb_usd {
 
     public fun swap_usd_rmb_(bank: &mut Bank,in:Coin<USD>,ctx: &mut TxContext):Coin<RMB>{
         let in_value = coin::value(&in);
+
         let out_amt = in_value * 73u64 / 10u64;
+
+
         // 把美元存在银行
         balance::join(&mut bank.usd, coin::into_balance(in));
         let out_balance =   balance::split(&mut bank.rmb,out_amt);
