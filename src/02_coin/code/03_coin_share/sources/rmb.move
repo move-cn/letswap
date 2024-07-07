@@ -7,7 +7,8 @@ module coin_share::rmb {
     public struct RMB has drop {}
 
     fun init(witness: RMB, ctx: &mut TxContext) {
-        let (treasury, metadata) = coin::create_currency(witness, 6, b"RMB", b"", b"", option::none(), ctx);
+        let (treasury, metadata) =
+            coin::create_currency(witness, 6, b"RMB", b"", b"", option::none(), ctx);
         transfer::public_freeze_object(metadata);
 
         transfer::public_share_object(treasury);

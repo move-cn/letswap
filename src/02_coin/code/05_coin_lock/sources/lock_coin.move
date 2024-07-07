@@ -52,6 +52,7 @@ module coin_lock::lock_coin {
 
         let current_ms = tx_context::epoch_timestamp_ms(ctx);
         assert!(current_ms > lock_coin.release_time, ErrNotRelease);
+
         let LockCoin  { id,balance,release_time:_ }= lock_coin;
 
         let  unlock_coin  = coin::from_balance(balance,ctx);
@@ -60,4 +61,6 @@ module coin_lock::lock_coin {
 
         object::delete(id);
     }
+
+
 }

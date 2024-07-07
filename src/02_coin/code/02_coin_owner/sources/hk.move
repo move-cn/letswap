@@ -21,6 +21,7 @@ module coin_owner::hk {
             ctx);
 
         transfer::public_freeze_object(coin_metadata);
+
         let my_address = sender(ctx);
         transfer::public_transfer(treasury_cap, my_address)
     }

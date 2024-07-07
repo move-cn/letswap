@@ -28,9 +28,6 @@ module coin_supply::rmb {
         let supply = coin::treasury_into_supply(treasury);
 
 
-
-
-
         let supply_hold = SupplyHold {
             id: object::new(ctx),
             supply
