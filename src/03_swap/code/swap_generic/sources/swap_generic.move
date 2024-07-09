@@ -8,18 +8,18 @@ module swap_generic::swap_generic {
     use sui::transfer::{transfer, share_object, public_transfer};
     use sui::tx_context::{TxContext, sender};
 
-
     public struct AdminCap has key {
         id: UID,
     }
 
-    public struct Bank<phantom CoinA, phantom CoinB> has key {
+    public struct Pair<phantom CoinA, phantom CoinB> has key {
         id: UID,
         coin_a: Balance<CoinA>,
         coin_b: Balance<CoinB>,
-        a_: u64,
-        b_: u64,
     }
+
+
+
 
     fun init(ctx: &mut TxContext) {
         let admin_cap = AdminCap { id: object::new(ctx) };
@@ -27,7 +27,7 @@ module swap_generic::swap_generic {
     }
 
     public entry fun create_bank<CoinA, CoinB>(a: u64, b: u64, ctx: &mut TxContext) {
-        let bank = Bank {
+        let bank = Pair {
             id: object::new(ctx),
             coin_a: balance::zero<CoinA>(),
             coin_b: balance::zero<CoinB>(),
@@ -39,12 +39,12 @@ module swap_generic::swap_generic {
 
 
     /// 1 a = 1 b
-    public entry fun swap_a_b<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>,
+    public entry fun swap_a_b<CoinA, CoinB>(bank: &mut Pair<CoinA, CoinB>,
                                             in: Coin<CoinA>, ctx: &mut TxContext) {
         let amt = coin::value(&in);
         balance::join(&mut bank.coin_a, coin::into_balance(in));
 
-        let amt_b = amt * bank.a_ / bank.b_;
+        let amt_b = 11;
 
         let b_balance = balance::split(&mut bank.coin_b, amt_b);
 
@@ -55,7 +55,7 @@ module swap_generic::swap_generic {
 
 
     public entry fun deposit_coin_a<CoinA, CoinB>(
-        bank: &mut Bank<CoinA, CoinB>,
+        bank: &mut Pair<CoinA, CoinB>,
         a: Coin<CoinA>,
         _: &mut TxContext
     ) {
@@ -65,7 +65,7 @@ module swap_generic::swap_generic {
 
 
     public entry fun withdraw_a<CoinA, CoinB>(_: &AdminCap,
-                                              bank: &mut Bank<CoinA, CoinB>,
+                                              bank: &mut Pair<CoinA, CoinB>,
                                               amt: u64, ctx: &mut TxContext) {
         let a_balance = balance::split<CoinA>(&mut bank.coin_a, amt);
 
