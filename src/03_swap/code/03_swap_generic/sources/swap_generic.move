@@ -38,25 +38,25 @@ module swap_generic::swap_generic {
 
     public entry fun deposit_a<CoinA,CoinB>(bank:&mut Bank<CoinA,CoinB>,a:Coin<CoinA>,_:&mut TxContext){
         let a_balance = coin::into_balance(a);
-        balance::join(&mut bank.a,a_balance);
+        bank.a.join(a_balance);
     }
 
     public entry fun deposit_b<CoinA,CoinB>(bank:&mut Bank<CoinA,CoinB>,b:Coin<CoinB>,_:&mut TxContext){
         let b_balance = coin::into_balance(b);
-        balance::join(&mut bank.b,b_balance);
+        bank.b.join(b_balance);
     }
 
 
     public entry fun swap_a_b<CoinA,CoinB>(bank: &mut Bank<CoinA,CoinB>, a: Coin<CoinA>, ctx: &mut TxContext) {
         let amt = coin::value(&a);
 
-        balance::join(&mut bank.a, coin::into_balance(a));
+        bank.a.join(coin::into_balance(a));
 
 
         let amt_b = amt;
 
 
-        let b_balance = balance::split(&mut bank.b, amt_b);
+        let b_balance = bank.b.split(amt_b);
 
 
         let b = coin::from_balance(b_balance, ctx);

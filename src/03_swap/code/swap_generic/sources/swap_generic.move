@@ -31,8 +31,6 @@ module swap_generic::swap_generic {
             id: object::new(ctx),
             coin_a: balance::zero<CoinA>(),
             coin_b: balance::zero<CoinB>(),
-            a_: a,
-            b_: b
         };
         share_object(bank);
     }
@@ -42,11 +40,11 @@ module swap_generic::swap_generic {
     public entry fun swap_a_b<CoinA, CoinB>(bank: &mut Pair<CoinA, CoinB>,
                                             in: Coin<CoinA>, ctx: &mut TxContext) {
         let amt = coin::value(&in);
-        balance::join(&mut bank.coin_a, coin::into_balance(in));
+        bank.coin_a.join(coin::into_balance(in));
 
         let amt_b = 11;
 
-        let b_balance = balance::split(&mut bank.coin_b, amt_b);
+        let b_balance = bank.coin_b.split(amt_b);
 
         let b = coin::from_balance(b_balance, ctx);
 
@@ -60,14 +58,14 @@ module swap_generic::swap_generic {
         _: &mut TxContext
     ) {
         let a_balance = coin::into_balance(a);
-        balance::join(&mut bank.coin_a, a_balance);
+        bank.coin_a.join(a_balance);
     }
 
 
     public entry fun withdraw_a<CoinA, CoinB>(_: &AdminCap,
                                               bank: &mut Pair<CoinA, CoinB>,
                                               amt: u64, ctx: &mut TxContext) {
-        let a_balance = balance::split<CoinA>(&mut bank.coin_a, amt);
+        let a_balance = bank.coin_a.split::<CoinA>(amt);
 
         let a = coin::from_balance(a_balance, ctx);
         public_transfer(a, sender(ctx));

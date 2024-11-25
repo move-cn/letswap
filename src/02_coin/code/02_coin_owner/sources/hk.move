@@ -1,18 +1,18 @@
-module coin_owner::hk {
+module coin_owner::hk ;
 
-    use sui::coin::create_currency;
-    use sui::tx_context::{TxContext, sender};
-    use std::option;
-    use sui::transfer;
+use sui::coin::create_currency;
+use sui::tx_context::{TxContext, sender};
+use std::option;
+use sui::transfer;
 
-    public struct HK has drop {}
+public struct HK has drop {}
 
-    const SendAddress: address = @0x01;
+const SendAddress: address = @0x01;
 
-    fun init(hk: HK, ctx: &mut TxContext) {
-        let (treasury_cap, coin_metadata) =
-            create_currency(
-                hk,
+fun init(hk: HK, ctx: &mut TxContext) {
+    let (treasury_cap, coin_metadata) =
+        create_currency(
+            hk,
             8,
             b"HK",
             b"HK  made in hongkong",
@@ -20,9 +20,9 @@ module coin_owner::hk {
             option::none(),
             ctx);
 
-        transfer::public_freeze_object(coin_metadata);
+    transfer::public_freeze_object(coin_metadata);
 
-        let my_address = sender(ctx);
-        transfer::public_transfer(treasury_cap, my_address)
-    }
+    let my_address = sender(ctx);
+    transfer::public_transfer(treasury_cap, my_address)
 }
+

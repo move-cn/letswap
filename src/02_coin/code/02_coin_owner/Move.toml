@@ -2,7 +2,7 @@
 name = "CoinOwner"
 version = "0.0.1"
 publish-at = "0x26758c3a1aa0c3bf388cf7d94c90bb46ab3668c7ad99add1acd5139424b93533"
-edition = "2024.beta"
+edition = "2024"
 
 [dependencies]
 Sui = { git = "https://gitee.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
