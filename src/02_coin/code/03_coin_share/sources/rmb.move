@@ -11,5 +11,6 @@ fun init(witness: RMB, ctx: &mut TxContext) {
         coin::create_currency(witness, 6, b"RMB", b"", b"", option::none(), ctx);
     transfer::public_freeze_object(metadata);
 
+    /// 所有人都能访问
     transfer::public_share_object(treasury);
 }

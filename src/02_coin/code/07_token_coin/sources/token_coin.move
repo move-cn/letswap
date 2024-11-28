@@ -11,7 +11,7 @@ module token_coin::token_coin {
         let (treasury, metadata) = coin::create_currency(witness, 6, b"TOKEN_COIN", b"", b"", option::none(), ctx);
         transfer::public_freeze_object(metadata);
 
-      //  token::new_policy()
+        // token::new_policy()
 
         transfer::public_transfer(treasury, tx_context::sender(ctx))
     }
