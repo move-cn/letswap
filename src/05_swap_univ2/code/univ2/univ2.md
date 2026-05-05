@@ -1,20 +1,47 @@
-# 汇率 x * y = c
+# 发布日志示例
 
-固定乘积   coin x amount   * coin y amount  =  c   c是常量     x y 一个币对  coin a  coin b
+使用以下命令发布合约：
 
-usd   rmb 币对     swap
+```shell
+sui client publish
+```
 
-交互前银行的钱 100 usd   720 rmb       100 * 720 = 72000     c 72000 常量    常量是做swap这操作 不会改变这个值
+发布成功后，会输出类似如下信息：
 
-给 1 usd   给银行      ？ rmb    
-交换银行的钱:  101 usd        712.87  rmb   101 * ？ = 72000     ？= 72000 / 101   =  712.87
-拿到的钱  720 - 712.87   = 7.13 
+```
+Transaction Digest: <DIGEST>
 
+Created Objects:
+  ┌──
+  │ ObjectID: <TREASURY_CAP_ID>
+  │ Sender: <SENDER_ADDRESS>
+  │ Owner: Account Address ( <SENDER_ADDRESS> )
+  │ ObjectType: 0x2::coin::TreasuryCap<0x2::coin::CoinMetadata<PACKAGE_ID>::hk::HK>
+  │ Version: <VERSION>
+  │ Digest: <DIGEST>
+  └──
 
+Mutated Objects:
+  ┌──
+  │ ObjectID: <GAS_COIN_ID>
+  │ Sender: <SENDER_ADDRESS>
+  │ Owner: Account Address ( <SENDER_ADDRESS> )
+  │ ObjectType: 0x2::coin::Coin<0x2::sui::SUI>
+  │ Version: <VERSION>
+  │ Digest: <DIGEST>
+  └──
 
+Published Objects:
+  ┌──
+  │ PackageID: <PACKAGE_ID>
+  │ Version: 1
+  │ Digest: <DIGEST>
+  | Modules: hk, rmb, usd
+  └──
+```
 
+关键字段说明：
 
-
-
-
-
+- **PackageID**: 发布的合约包地址，后续调用合约时需要使用
+- **TreasuryCap**: 铸造权限对象，持有者可以铸造新 Coin
+- **CoinMetadata**: Coin 元数据（名称、精度等），发布时被冻结为不可变对象

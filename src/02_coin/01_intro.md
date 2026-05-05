@@ -1,22 +1,155 @@
-# Coin
+# Coin 概述
 
-Coin是Sui上的标准代币协议
+本章将系统介绍 Sui Move 中 Coin（同质化代币）标准的核心概念、创建方式与高级用法。在深入代码之前，我们需要先理解 Sui 的对象模型、Move 的能力系统，以及 Coin 标准的整体架构。
 
-我们先来看下Coin的定义
-[Coin](https://github.com/MystenLabs/sui/blob/main/crates/sui-framework/packages/sui-framework/sources/coin.move#L26)
-```rust
-    /// A coin of type `T` worth `value`. Transferable and storable
-    public struct Coin<phantom T> has key, store {
-        id: UID,
-        balance: Balance<T>
-    }
+## 本章目标
+
+- 理解 Sui 对象模型的三种所有权模式
+- 掌握 Move 能力系统（key、store、drop、copy）的含义
+- 了解 Coin 标准的核心类型及其相互关系
+- 预览 Coin 所有权模式的各种变体
+
+## Sui 对象模型简介
+
+Sui 的一切数据都以"对象"（Object）为基本单元。每个对象都有一个全局唯一的 ID，并且具有明确的所有权归属。Sui 的对象所有权分为三种模式：
+
+| 所有权模式 | 说明 | 读写权限 | 典型用途 |
+|-----------|------|---------|---------|
+| 独享对象（Owned Object） | 对象归属于某个地址，只有该地址的拥有者才能访问 | 仅拥有者可读写 | TreasuryCap、个人 Coin |
+| 共享对象（Shared Object） | 对象不归属任何地址，任何人都可以访问 | 任何人可读写，需共识排序 | 去中心化交易所、共享资金池 |
+| 不可变对象（Immutable Object） | 对象被冻结，任何人只能读取，无法修改 | 任何人可读，无人可写 | CoinMetadata、配置信息 |
+
+### 独享对象
+
+独享对象通过 `transfer::public_transfer(obj, address)` 创建。对象转移给指定地址后，只有该地址的拥有者可以在交易中使用它。由于独享对象的访问权限明确，Sui 可以对其进行并行处理，不需要经过共识机制。
+
+在 Coin 体系中，默认情况下铸造出来的 Coin 和 TreasuryCap 都是独享对象。
+
+### 共享对象
+
+共享对象通过 `transfer::public_share_object(obj)` 创建。共享对象不属于任何地址，所有用户都可以读取和引用它。由于多个交易可能同时访问共享对象，Sui 需要通过共识机制对共享对象的访问进行排序，以保证一致性。
+
+在 DeFi 场景中，共享对象非常常见。例如一个去中心化交易所的资金池，任何人都可以存入或取出资产，因此需要作为共享对象存在。
+
+### 不可变对象
+
+不可变对象通过 `transfer::public_freeze_object(obj)` 创建。冻结后的对象永远无法被修改或删除，任何人都可以读取其中的数据。不可变对象是最安全的共享方式，因为它不存在并发冲突。
+
+Coin 的元数据（CoinMetadata）通常会被冻结为不可变对象，因为名称、符号、精度等信息一旦确定就不应再被修改。
+
+## Move 能力系统
+
+Move 使用"能力"（Abilities）来约束类型的行为。一个结构体可以声明零到四种能力，每种能力决定了该类型可以执行的操作：
+
+| 能力 | 关键字 | 允许的操作 | 对 Coin 体系的影响 |
+|------|--------|-----------|-------------------|
+| 键 | `key` | 可以作为全局存储中的顶层对象 | 使结构体成为 Sui 对象，必须包含 `id: UID` 字段 |
+| 存储 | `store` | 可以作为其他对象的字段，可以在地址间转移 | 使 Coin 可以嵌入其他结构体或存入容器中 |
+| 丢弃 | `drop` | 允许在作用域结束时被隐式丢弃 | Witness 类型需要此能力，确保用完即丢 |
+| 复制 | `copy` | 允许被复制（深拷贝） | Coin 不应有此能力，防止代币被任意复制 |
+
+### 能力组合与 Coin 体系中的常见类型
+
 ```
-`Coin` 内部有一个 `id` 字段表面是一个对象，只有一个 类型为 `Balance` 的字段 我们把 `Balance`的源码也放出来
-```rust
-    public struct Balance<phantom T> has store {
-        value: u64
-    }
+Coin<T>           has key, store       -- 顶层对象，可以在地址间转移
+Balance<T>        has store            -- 非对象，只能作为字段嵌入
+TreasuryCap<T>    has key, store       -- 顶层对象，持有铸造权限
+CoinMetadata<T>   has key, store       -- 顶层对象，存储代币元信息
+Supply<T>         has store            -- 非对象，从 TreasuryCap 拆解而来
+Witness (如 HK)   has drop             -- 一次性见证，用完即丢
 ```
 
-`Balance` 类型
-只有一个类型为`u64` 的 `value`字段 和一个泛型的占位符 `T`
+`Coin` 具有 `key + store`，意味着它既是独立的顶层对象，也可以作为其他对象的字段被存储。而 `Balance` 只有 `store`，它不是独立的对象，只能嵌入在其他结构体内部使用。这种设计是有意为之的：`Coin` 代表流通中的代币，需要独立存在；`Balance` 代表纯粹的数值，用于内部记账。
+
+Witness 类型只有 `drop` 能力，确保它在初始化函数中被消费后无法再次使用。这是 Move 类型系统保障安全的一种方式。
+
+## Coin 标准概述
+
+Sui 的 Coin 标准由四个核心类型组成，它们之间的关系如下：
+
+```
+               coin::create_currency()
+                       |
+                       v
+        +--------------+---------------+
+        |                              |
+  TreasuryCap<T>               CoinMetadata<T>
+  (铸造权限)                    (代币元信息)
+        |                              |
+        |   coin::mint()               |
+        v                              |
+     Coin<T>                           |
+     (代币对象)                         |
+        |                              |
+        |   coin::into_balance()       |
+        v                              |
+     Balance<T>                 (冻结为不可变对象)
+     (余额数值)
+```
+
+### TreasuryCap（国库权限）
+
+`TreasuryCap<T>` 是代币的铸造权限凭证。每个 Coin 类型只会创建一个 TreasuryCap，持有者可以通过 `coin::mint()` 铸造新代币，也可以通过 `coin::burn()` 销毁代币。TreasuryCap 的安全至关重要，如果落入恶意方手中，攻击者可以无限铸造代币。
+
+### CoinMetadata（代币元信息）
+
+`CoinMetadata<T>` 存储代币的描述性信息，包括名称、符号、精度、描述和图标 URL。这些信息通常在代币创建时确定，随后冻结为不可变对象，确保任何人都可以读取但无法篡改。
+
+### Coin（代币对象）
+
+`Coin<T>` 是用户实际持有的代币对象。它的定义非常简洁：
+
+```rust
+public struct Coin<phantom T> has key, store {
+    id: UID,
+    balance: Balance<T>
+}
+```
+
+一个 `Coin` 对象内部持有一个 `Balance`，代表该对象中包含的代币数量。用户可以在钱包中拥有多个同一类型的 `Coin` 对象。
+
+### Balance（余额）
+
+`Balance<T>` 是一个纯数值容器：
+
+```rust
+public struct Balance<phantom T> has store {
+    value: u64
+}
+```
+
+它只有一个 `u64` 字段记录数量，加上一个泛型参数标记代币类型。`Balance` 不能独立存在于全局存储中，只能嵌入到其他对象里。这种设计将"数值"和"对象"的概念分离，为自定义封装提供了灵活性。
+
+## 所有权模式预览
+
+在后续章节中，我们将逐一实现以下所有权模式：
+
+**独享所有权（第 2 章）**
+
+TreasuryCap 转移给发布者地址，只有发布者可以铸造 Coin。这是最简单、最常见的模式。
+
+**共享所有权（第 3 章）**
+
+TreasuryCap 作为共享对象发布，任何人都可以调用铸造函数。适用于测试环境和无许可铸造场景。
+
+**发行量控制（第 4 章）**
+
+将 TreasuryCap 拆解为 Supply，封装到自定义结构中，实现发行量上限、权限分离和手续费收取等高级功能。
+
+**Coin 锁定（第 5 章）**
+
+创建自定义的锁定结构体，将 Balance 封装其中并设定释放时间，实现代币的时间锁功能。
+
+**Coin 黑名单（第 6 章）**
+
+使用 Sui 内置的 DenyList 机制，允许代币发行者禁止特定地址使用该代币，满足合规和安全需求。
+
+**Token 代币（第 7 章）**
+
+介绍 Sui 的 Token 标准，它在 Coin 基础上增加了策略管理能力，适用于需要精细管控的场景。
+
+## 本章小结
+
+本章概述了理解 Sui Coin 体系所需的基础知识。Sui 的对象模型通过三种所有权模式（独享、共享、不可变）灵活控制对象访问权限；Move 的能力系统通过四种能力（key、store、drop、copy）约束类型行为；Coin 标准围绕 TreasuryCap、CoinMetadata、Coin 和 Balance 四个核心类型构建。
+
+在下一章中，我们将从最简单的独享所有权 Coin 开始，逐步深入每一个主题。

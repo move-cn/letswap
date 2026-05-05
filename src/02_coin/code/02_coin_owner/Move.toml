@@ -5,7 +5,7 @@ version = "0.0.1"
 edition = "2024"
 
 [dependencies]
-Sui = { git = "https://gitee.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
 
 [addresses]
 coin_owner = "0x97e291d294087b9acd4c42082ae70406409a733cacebce7553594a068d083a0c"
