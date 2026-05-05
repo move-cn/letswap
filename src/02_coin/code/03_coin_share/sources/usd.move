@@ -1,15 +1,19 @@
 module coin_share::usd ;
-use std::option;
-use sui::coin;
-use sui::transfer;
+use sui::coin_registry;
+use std::string;
 
 public struct USD has drop {}
 
 fun init(witness: USD, ctx: &mut TxContext) {
-    let (treasury, metadata) =
-        coin::create_currency(witness, 6, b"USD", b"", b"", option::none(), ctx);
-    transfer::public_freeze_object(metadata);
-    // transfer::public_share_object(metadata);
-
+    let (init, treasury) = coin_registry::new_currency_with_otw(
+        witness,
+        6,
+        string::utf8(b"USD"),
+        string::utf8(b""),
+        string::utf8(b""),
+        string::utf8(b""),
+        ctx
+    );
+    coin_registry::finalize_and_delete_metadata_cap(init, ctx);
     transfer::public_share_object(treasury);
 }

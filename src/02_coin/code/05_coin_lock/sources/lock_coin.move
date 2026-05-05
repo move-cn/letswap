@@ -1,19 +1,12 @@
 module coin_lock::lock_coin ;
-use std::option;
 use sui::balance::Balance;
-use sui::coin;
-use sui::coin::{TreasuryCap, balance};
-use sui::object;
-use sui::object::{UID, id};
-use sui::transfer;
-use sui::transfer::public_transfer;
-use sui::tx_context::{Self, TxContext, sender};
-
+use sui::coin::{TreasuryCap};
+use sui::coin_registry;
+use std::string;
 
 const ErrNotRelease: u64 = 0x00001;
 
 public struct LOCK_COIN has drop {}
-
 
 public struct LockCoin has key {
     id: UID,
@@ -21,15 +14,21 @@ public struct LockCoin has key {
     release_time: u64
 }
 
-
 fun init(witness: LOCK_COIN, ctx: &mut TxContext) {
-    let (treasury, metadata) = coin::create_currency(witness, 6, b"USD", b"", b"", option::none(), ctx);
-    transfer::public_freeze_object(metadata);
-    transfer::public_transfer(treasury, tx_context::sender(ctx));
+    let (init, treasury) = coin_registry::new_currency_with_otw(
+        witness,
+        6,
+        string::utf8(b"USD"),
+        string::utf8(b""),
+        string::utf8(b""),
+        string::utf8(b""),
+        ctx
+    );
+    coin_registry::finalize_and_delete_metadata_cap(init, ctx);
+    transfer::public_transfer(treasury, ctx.sender());
 }
 
-
-public entry fun mint_and_lock(
+entry fun mint_and_lock(
     treasury: &mut TreasuryCap<LOCK_COIN>,
     amount: u64,
     lock_day: u64,
@@ -48,7 +47,7 @@ public entry fun mint_and_lock(
     transfer::transfer(lock, to);
 }
 
-public entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
+entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
     let current_ms = tx_context::epoch_timestamp_ms(ctx);
     assert!(current_ms > lock_coin.release_time, ErrNotRelease);
 
@@ -56,10 +55,7 @@ public entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
 
     let unlock_coin = coin::from_balance(balance, ctx);
 
-    public_transfer(unlock_coin, sender(ctx));
+    transfer::public_transfer(unlock_coin, ctx.sender());
 
     object::delete(id);
 }
-
-
-

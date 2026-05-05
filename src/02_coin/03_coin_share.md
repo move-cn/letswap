@@ -17,6 +17,7 @@
 
 ```move
 module coin_share::rmb ;
+
 use std::option;
 use sui::coin;
 use sui::transfer;
@@ -37,6 +38,7 @@ fun init(witness: RMB, ctx: &mut TxContext) {
 
 ```move
 module coin_share::usd ;
+
 use std::option;
 use sui::coin;
 use sui::transfer;

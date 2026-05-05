@@ -1,14 +1,12 @@
-module coin_supply::hk;
-use std::address;
+module coin_supply::hk ;
 use sui::balance;
 use sui::balance::Supply;
-use sui::coin;
 use sui::coin::Coin;
-use sui::transfer::{public_freeze_object, public_transfer, share_object};
-use sui::vec_set::VecSet;
+use sui::coin_registry;
+use sui::transfer::{public_transfer, share_object};
+use std::string;
 
 public struct HK has drop {}
-
 
 public struct HKTreasuryCap has key, store {
     id: UID,
@@ -17,22 +15,20 @@ public struct HKTreasuryCap has key, store {
 
 public struct Pools has key, store {
     id: UID,
-    supply: Supply<HK>,
-    // addresses:VecSet<address>
-    ///
+    supply: Supply<HK>
 }
 
-
-
-
-
-
 fun init(hk: HK, ctx: &mut TxContext) {
-    let (treasury, metadata) =
-        coin::create_currency(hk, 6, b"HK", b"", b"", option::none(), ctx);
-
-
-    public_freeze_object(metadata);
+    let (init, treasury) = coin_registry::new_currency_with_otw(
+        hk,
+        6,
+        string::utf8(b"HK"),
+        string::utf8(b""),
+        string::utf8(b""),
+        string::utf8(b""),
+        ctx
+    );
+    coin_registry::finalize_and_delete_metadata_cap(init, ctx);
 
     let supply = coin::treasury_into_supply(treasury);
 
@@ -43,15 +39,12 @@ fun init(hk: HK, ctx: &mut TxContext) {
 
     public_transfer(hk_treasury_cap, ctx.sender());
 
-
     let pool = Pools {
         id: object::new(ctx),
         supply
     };
 
-   share_object(pool);
-
-
+    share_object(pool);
 }
 
 public fun mint(hk_cap: &mut HKTreasuryCap, amt: u64, ctx: &mut TxContext): Coin<HK> {
@@ -67,18 +60,13 @@ public fun mint(hk_cap: &mut HKTreasuryCap, amt: u64, ctx: &mut TxContext): Coin
     hk_coin
 }
 
-public fun mint2pool(pool: &mut Pools, amt: u64,who:address, ctx: &mut TxContext): Coin<HK> {
-    let supply_amt = balance::supply_value(&hk_cap.supply);
+public fun mint2pool(pool: &mut Pools, amt: u64, who: address, ctx: &mut TxContext): Coin<HK> {
+    let supply_amt = balance::supply_value(&pool.supply);
     let total = amt + supply_amt;
     //  MAX 100亿
-
-   /// assert!(,111)
-
     let balance = pool.supply.increase_supply(amt);
 
     let hk_coin = coin::from_balance(balance, ctx);
 
     hk_coin
 }
-
-

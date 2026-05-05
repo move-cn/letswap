@@ -1,21 +1,21 @@
 module deny_coin::deny_coin ;
-
-use std::option;
-use sui::coin::{create_regulated_currency_v2};
-use sui::url::Url;
+use sui::coin_registry;
+use std::string;
 
 public struct DENY_COIN has drop {}
 
-
 fun init(witness: DENY_COIN, ctx: &mut TxContext) {
-    let (treasury, deny_cap, metadata) =
-        create_regulated_currency_v2<DENY_COIN>(witness, 8, b"deny", b"deny", b"deny",
-            option::none<Url>(),true, ctx);
-
-
-    transfer::public_freeze_object(metadata);
-    transfer::public_transfer(deny_cap, tx_context::sender(ctx));
-    transfer::public_transfer(treasury, tx_context::sender(ctx));
+    let (init, treasury) = coin_registry::new_currency_with_otw(
+        witness,
+        8,
+        string::utf8(b"deny"),
+        string::utf8(b"deny"),
+        string::utf8(b"deny"),
+        string::utf8(b""),
+        ctx
+    );
+    let deny_cap = coin_registry::make_regulated(&mut init, treasury, ctx);
+    coin_registry::finalize_and_delete_metadata_cap(init, ctx);
+    transfer::public_transfer(deny_cap, ctx.sender());
+    transfer::public_transfer(treasury, ctx.sender());
 }
-
-

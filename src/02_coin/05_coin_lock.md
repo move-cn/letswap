@@ -10,6 +10,7 @@ Sui 的 `Coin` 是一个具有 `key` 和 `store` 能力的对象，可以在地�
 
 ```move
 module coin_lock::lock_coin ;
+
 use std::option;
 use sui::balance::Balance;
 use sui::coin;
@@ -17,7 +18,6 @@ use sui::coin::{TreasuryCap, balance};
 use sui::object;
 use sui::object::{UID, id};
 use sui::transfer;
-use sui::transfer::public_transfer;
 use sui::tx_context::{Self, TxContext, sender};
 
 const ErrNotRelease: u64 = 0x00001;
@@ -58,7 +58,7 @@ public entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
     assert!(current_ms > lock_coin.release_time, ErrNotRelease);
     let LockCoin { id, balance, release_time: _ } = lock_coin;
     let unlock_coin = coin::from_balance(balance, ctx);
-    public_transfer(unlock_coin, sender(ctx));
+    transfer::public_transfer(unlock_coin, sender(ctx));
     object::delete(id);
 }
 ```
@@ -128,7 +128,7 @@ public entry fun unlock_coin(lock_coin: LockCoin, ctx: &mut TxContext) {
     assert!(current_ms > lock_coin.release_time, ErrNotRelease);
     let LockCoin { id, balance, release_time: _ } = lock_coin;
     let unlock_coin = coin::from_balance(balance, ctx);
-    public_transfer(unlock_coin, sender(ctx));
+    transfer::public_transfer(unlock_coin, sender(ctx));
     object::delete(id);
 }
 ```

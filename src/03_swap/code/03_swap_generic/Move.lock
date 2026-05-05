@@ -4,12 +4,6 @@
 [move]
 version = 4
 
-[pinned.mainnet.CoinOwner]
-source = { root = true }
-use_environment = "mainnet"
-manifest_digest = "BA49968BFF7C4A4D9F013B59535CF8B89D935A7C6D63C121606B1FE844829B72"
-deps = { Sui = "Sui" }
-
 [pinned.mainnet.MoveStdlib]
 source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "6d4ec0b0621dd9555753c9ecd5be021b25a0d267" }
 use_environment = "mainnet"
@@ -21,3 +15,9 @@ source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-f
 use_environment = "mainnet"
 manifest_digest = "CD547CB1ACCE0880C835DAED2D8FFCB91D56C833AE5240D3AA5B918398263195"
 deps = { MoveStdlib = "MoveStdlib" }
+
+[pinned.mainnet.swap_generic]
+source = { root = true }
+use_environment = "mainnet"
+manifest_digest = "BA49968BFF7C4A4D9F013B59535CF8B89D935A7C6D63C121606B1FE844829B72"
+deps = { Sui = "Sui" }

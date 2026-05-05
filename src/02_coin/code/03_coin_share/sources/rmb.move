@@ -1,16 +1,20 @@
 module coin_share::rmb ;
-use std::option;
-use sui::coin;
-use sui::transfer;
-use sui::tx_context::{TxContext};
+use sui::coin_registry;
+use std::string;
 
 public struct RMB has drop {}
 
 fun init(witness: RMB, ctx: &mut TxContext) {
-    let (treasury, metadata) =
-        coin::create_currency(witness, 6, b"RMB", b"", b"", option::none(), ctx);
-    transfer::public_freeze_object(metadata);
-
-    /// 所有人都能访问
+    let (init, treasury) = coin_registry::new_currency_with_otw(
+        witness,
+        6,
+        string::utf8(b"RMB"),
+        string::utf8(b""),
+        string::utf8(b""),
+        string::utf8(b""),
+        ctx
+    );
+    coin_registry::finalize_and_delete_metadata_cap(init, ctx);
+    // 所有人都能访问
     transfer::public_share_object(treasury);
 }

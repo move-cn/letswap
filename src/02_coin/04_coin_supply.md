@@ -24,6 +24,7 @@ let supply = coin::treasury_into_supply(treasury);
 
 ```move
 module coin_supply::rmb ;
+
 use std::option;
 use sui::balance;
 use sui::balance::Supply;
@@ -32,7 +33,6 @@ use sui::coin::{Coin};
 use sui::object;
 use sui::object::UID;
 use sui::transfer;
-use sui::transfer::{transfer};
 use sui::tx_context::{Self, TxContext, sender};
 
 public struct RMB has drop {}
@@ -54,7 +54,7 @@ fun init(witness: RMB, ctx: &mut TxContext) {
         id: object::new(ctx),
         supply
     };
-    transfer(supply_hold, sender(ctx));
+    transfer::transfer(supply_hold, sender(ctx));
 }
 
 public fun mint2(sup: &mut SupplyHold, amount: u64, ctx: &mut TxContext): Coin<RMB> {
@@ -74,12 +74,16 @@ public fun mint2(sup: &mut SupplyHold, amount: u64, ctx: &mut TxContext): Coin<R
 `hk` 模块展示了如何在铸造时检查发行上限：
 
 ```move
-module coin_supply::hk;
+module coin_supply::hk ;
+
 use sui::balance;
 use sui::balance::Supply;
 use sui::coin;
 use sui::coin::Coin;
-use sui::transfer::{public_freeze_object, public_transfer, share_object};
+use sui::object;
+use sui::object::UID;
+use sui::transfer;
+use sui::tx_context::{TxContext, sender};
 
 public struct HK has drop {}
 
@@ -92,7 +96,7 @@ fun init(hk: HK, ctx: &mut TxContext) {
     let (treasury, metadata) =
         coin::create_currency(hk, 6, b"HK", b"", b"", option::none(), ctx);
 
-    public_freeze_object(metadata);
+    transfer::public_freeze_object(metadata);
 
     let supply = coin::treasury_into_supply(treasury);
 
@@ -101,7 +105,7 @@ fun init(hk: HK, ctx: &mut TxContext) {
         supply
     };
 
-    public_transfer(hk_treasury_cap, ctx.sender());
+    transfer::public_transfer(hk_treasury_cap, sender(ctx));
 }
 
 public fun mint(hk_cap: &mut HKTreasuryCap, amt: u64, ctx: &mut TxContext): Coin<HK> {
@@ -124,11 +128,14 @@ public fun mint(hk_cap: &mut HKTreasuryCap, amt: u64, ctx: &mut TxContext): Coin
 
 ```move
 module coin_supply::my_coin ;
+
 use std::option;
 use sui::balance::{Balance, Supply};
 use sui::coin;
+use sui::object;
+use sui::object::UID;
 use sui::transfer;
-use sui::tx_context::{TxContext};
+use sui::tx_context::{TxContext, sender};
 
 public struct MY_COIN has drop {}
 
@@ -153,7 +160,7 @@ fun init(witness: MY_COIN, ctx: &mut TxContext) {
     transfer::public_freeze_object(metadata);
 
     let supply = coin::treasury_into_supply(treasury);
-    public_transfer(supply, ctx.sender());
+    transfer::public_transfer(supply, sender(ctx));
 }
 
 public fun mint(my_cap: HKTreasuryCap, ctx: &mut TxContext) : MyCoinB {
@@ -167,7 +174,7 @@ public fun mint(my_cap: HKTreasuryCap, ctx: &mut TxContext) : MyCoinB {
 public fun my_t(fee: &mut Fees, my: MyCoinB, to: address, ctx: &mut TxContext) {
     let fee1 = my.b.split(10);
     fee.b.join(fee1);
-    transfer(my, to);
+    transfer::transfer(my, to);
 }
 ```
 
@@ -191,7 +198,7 @@ public fun my_t(fee: &mut Fees, my: MyCoinB, to: address, ctx: &mut TxContext) {
 public fun my_t(fee: &mut Fees, my: MyCoinB, to: address, ctx: &mut TxContext) {
     let fee1 = my.b.split(10);
     fee.b.join(fee1);
-    transfer(my, to);
+    transfer::transfer(my, to);
 }
 ```
 
@@ -207,6 +214,7 @@ public fun my_t(fee: &mut Fees, my: MyCoinB, to: address, ctx: &mut TxContext) {
 
 ```move
 module coin_supply::usd ;
+
 use std::option;
 use sui::balance;
 use sui::balance::Supply;
