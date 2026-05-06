@@ -324,8 +324,8 @@ let output_amount = get_amount_out(in_value - dao_fee - lp_fee, reserve_in, rese
 池子的费率可以通过管理员地址修改：
 
 ```move
-public entry fun set_dao_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext)
-public entry fun set_lp_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext)
+public fun set_dao_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext)
+public fun set_lp_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext)
 ```
 
 只有 `global.move` 中配置的两个 manager_address 之一才能修改费率。系统还定义了最大费率限制：
@@ -438,7 +438,7 @@ swap.move（入口函数层）
 
 ```bash
 sui move build
-sui client publish --gas-budget 100000000
+sui client publish
 ```
 
 部署成功后，会输出交易摘要，其中包含 Global 对象的 ID。Global 对象在模块的 `init` 函数中自动创建并以共享对象的形式发布：
@@ -470,7 +470,6 @@ sui client call \
   --function create_pool \
   --type-args <USD_TYPE> <RMB_TYPE> \
   --args <GLOBAL_OBJECT_ID> \
-  --gas-budget 10000000
 ```
 
 此命令做了两件事：
@@ -501,7 +500,6 @@ sui client call \
     "[<RMB_COIN_OBJECT_ID>]" \
     <COIN_X_AMOUNT> <COIN_X_MIN> \
     <COIN_Y_AMOUNT> <COIN_Y_MIN> \
-  --gas-budget 10000000
 ```
 
 参数说明：
@@ -536,7 +534,6 @@ sui client call \
   --args <POOL_OBJECT_ID> \
     "[<USD_COIN_OBJECT_ID>]" \
     <IN_AMOUNT> <MIN_OUT_AMOUNT> \
-  --gas-budget 10000000
 
 # 用 RMB 换 USD
 sui client call \
@@ -547,7 +544,6 @@ sui client call \
   --args <POOL_OBJECT_ID> \
     "[<RMB_COIN_OBJECT_ID>]" \
     <IN_AMOUNT> <MIN_OUT_AMOUNT> \
-  --gas-budget 10000000
 ```
 
 参数说明：
@@ -577,7 +573,6 @@ sui client call \
   --args <POOL_OBJECT_ID> \
     "[<LP_COIN_OBJECT_ID>]" \
     <LP_AMOUNT> <MIN_X> <MIN_Y> \
-  --gas-budget 10000000
 ```
 
 赎回数量的计算公式为：
@@ -680,7 +675,7 @@ LetSwap 的权限控制分散在多个层面：
 
 ```move
 // global.move 中的管理员校验
-public entry fun set_manager_address_1(g: &mut Global, addr: address, ctx: &mut TxContext) {
+public fun set_manager_address_1(g: &mut Global, addr: address, ctx: &mut TxContext) {
     assert!(sender(ctx) == @admin_address, ENotAdmin);
     g.manager_address_1 = addr;
 }

@@ -1,12 +1,11 @@
+#[allow(deprecated_usage)]
 module letswap::global ;
 use std::ascii::into_bytes;
 use std::string::{Self, String};
 use std::type_name::{into_string, get};
 
-use sui::object::{Self, UID, ID};
 use sui::table;
-use sui::transfer;
-use sui::tx_context::{TxContext, sender};
+use sui::tx_context::sender;
 
 const ENotAdmin: u64 = 1;
 
@@ -38,17 +37,17 @@ public fun get_withdraw_address(g: &Global): address {
     g.withdraw_address
 }
 
-public entry fun set_withdraw_address(g: &mut Global, addr: address, ctx: &mut TxContext) {
+public fun set_withdraw_address(g: &mut Global, addr: address, ctx: &mut TxContext) {
     assert!(sender(ctx) == @admin_address, ENotAdmin);
     g.withdraw_address = addr;
 }
 
-public entry fun set_manager_address_1(g: &mut Global, addr: address, ctx: &mut TxContext) {
+public fun set_manager_address_1(g: &mut Global, addr: address, ctx: &mut TxContext) {
     assert!(sender(ctx) == @admin_address, ENotAdmin);
     g.manager_address_1 = addr;
 }
 
-public entry fun set_manager_address_2(g: &mut Global, addr: address, ctx: &mut TxContext) {
+public fun set_manager_address_2(g: &mut Global, addr: address, ctx: &mut TxContext) {
     assert!(sender(ctx) == @admin_address, ENotAdmin);
     g.manager_address_2 = addr;
 }

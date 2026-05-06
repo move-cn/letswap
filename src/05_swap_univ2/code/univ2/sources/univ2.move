@@ -1,3 +1,4 @@
+#[allow(lint(self_transfer))]
 module univ2::univ2 ;
 use std::u64;
 use sui::balance;
@@ -61,7 +62,7 @@ public fun a_to_b<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in: Coin<CoinA>, 
 }
 
 // 怎么交换
-public fun b_to_a<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in: Coin<CoinB>, out: u64, ctx: &mut TxContext) {
+public fun b_to_a<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in: Coin<CoinB>, _out: u64, ctx: &mut TxContext) {
     let a_value = bank.a.value();
     let b_value = bank.b.value();
 
@@ -78,7 +79,7 @@ public fun b_to_a<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in: Coin<CoinB>, 
     public_transfer(coin::from_balance(out_b, ctx), ctx.sender());
 }
 
-public fun add<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in_a: Coin<CoinA>, in_b: Coin<CoinB>, _: &mut TxContext) {
+public fun add<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in_a: Coin<CoinA>, in_b: Coin<CoinB>, ctx: &mut TxContext) {
     // swap 添加池子的时候 不能改变汇率
 
     let a_value = bank.a.value();
@@ -89,7 +90,7 @@ public fun add<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in_a: Coin<CoinA>, i
 
     // let rate = a_value * bank.scala / b_value;
 
-    //  100 / 50          101  /  50;    /1%
+    //  100 / 50          101  / 50;    /1%
     //  in_a_value
 
     assert!(a_value / b_value == in_a_value / in_b_value, 0x000222);
@@ -105,9 +106,9 @@ public fun add<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in_a: Coin<CoinA>, i
 }
 
 /// 取钱的方法
-public fun remove<CoinA, CoinB>(bank: &mut Bank<CoinA, CoinB>, in: Coin<LPCoin<CoinA, CoinB>>, ctx: &mut TxContext) {
+public fun remove<CoinA, CoinB>(_bank: &mut Bank<CoinA, CoinB>, in: Coin<LPCoin<CoinA, CoinB>>, ctx: &mut TxContext) {
     // 1000    / 1000000
     // a  *   1000    / 1000000
     //  in    ->  coina    coinb
+    public_transfer(in, ctx.sender());
 }
-

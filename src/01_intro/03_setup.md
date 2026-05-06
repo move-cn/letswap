@@ -183,7 +183,7 @@ EOF
 创建 `sources/hello.move`：
 
 ```move
-module hello_sui::hello {
+module hello_sui::hello ;
     use std::string;
     use sui::event;
 
@@ -194,7 +194,7 @@ module hello_sui::hello {
     }
 
     /// 创建一个新的 Hello 对象并转移给调用者
-    public entry fun say_hello(ctx: &mut TxContext) {
+    public fun say_hello(ctx: &mut TxContext) {
         let hello = Hello {
             id: object::new(ctx),
             message: string::utf8(b"Hello, Sui!"),
@@ -202,13 +202,12 @@ module hello_sui::hello {
         event::emit(SaidHello {
             message: string::utf8(b"Hello, Sui!"),
         });
-        transfer::public_transfer(hello, tx_context::sender(ctx));
+        transfer::public_transfer(hello, ctx.sender());
     }
 
     public struct SaidHello has copy, drop {
         message: string::String,
     }
-}
 ```
 
 ### 编译合约

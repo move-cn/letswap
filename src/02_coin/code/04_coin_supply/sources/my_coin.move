@@ -1,5 +1,6 @@
 module coin_supply::my_coin ;
 use sui::balance::{Balance, Supply};
+use sui::coin;
 use sui::coin_registry;
 use std::string;
 
@@ -34,21 +35,23 @@ fun init(witness: MY_COIN, ctx: &mut TxContext) {
 
     let supply = coin::treasury_into_supply(treasury);
 
-    transfer::public_transfer(supply, ctx.sender());
-    // 所有人都能访问
+    transfer::public_transfer(HKTreasuryCap {
+        id: object::new(ctx),
+        supply,
+    }, ctx.sender());
 }
 
-public fun mint(my_cap: HKTreasuryCap, ctx: &mut TxContext) : MyCoinB {
+public fun mint(my_cap: &mut HKTreasuryCap, ctx: &mut TxContext): MyCoinB {
     let my_supply = my_cap.supply.increase_supply(100);
-    MyCoinB{
+    MyCoinB {
         id: object::new(ctx),
         b: my_supply
     }
 }
 
 
-public fun my_t(fee: &mut Fees, my: MyCoinB, to: address, ctx: &mut TxContext) {
+public fun my_t(fee: &mut Fees, mut my: MyCoinB, to: address, _ctx: &mut TxContext) {
     let fee1 = my.b.split(10);
     fee.b.join(fee1);
-    transfer::public_transfer(my, to);
+    transfer::transfer(my, to);
 }

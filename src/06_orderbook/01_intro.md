@@ -92,7 +92,7 @@ struct OrderBook<phantom CoinTypeA, phantom CoinTypeB> has key {
 
 ```
 // 挂单：用户存入代币，创建一个新的 Order
-public entry fun place_order<CoinTypeA, CoinTypeB>(
+public fun place_order<CoinTypeA, CoinTypeB>(
     order_book: &mut OrderBook<CoinTypeA, CoinTypeB>,
     coin: Coin<CoinTypeA>,
     price: u64,
@@ -102,7 +102,7 @@ public entry fun place_order<CoinTypeA, CoinTypeB>(
 );
 
 // 撤单：用户取消自己的挂单，取回代币
-public entry fun cancel_order<CoinTypeA, CoinTypeB>(
+public fun cancel_order<CoinTypeA, CoinTypeB>(
     order_book: &mut OrderBook<CoinTypeA, CoinTypeB>,
     order_id: ID,
     ctx: &mut TxContext,

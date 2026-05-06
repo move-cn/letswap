@@ -1,7 +1,6 @@
 [book]
 authors = ["wsc"]
 language = "zh"
-multilingual = false
 src = "src"
 title = "Sui Swap 入门课程"
 

@@ -1,16 +1,15 @@
+#[allow(lint(self_transfer))]
 module letswap::swap ;
 use letswap::global::{Self, Global, exist_pool};
 use letswap::pool::{Self, Pool, LPCoin};
 use sui::coin::{Self, Coin};
 use sui::pay;
-use sui::transfer;
-use sui::tx_context::{Self, TxContext};
 
 const EHaveSlippage: u64 = 1;
 const EPoolExist: u64 = 2;
 
 /// create pool
-public entry fun create_pool<X, Y>(global: &mut Global, ctx: &mut TxContext) {
+public fun create_pool<X, Y>(global: &mut Global, ctx: &mut TxContext) {
     assert!(!exist_pool<X, Y>(global) || !exist_pool<Y, X>(global), EPoolExist);
     let id = pool::create_pool<X, Y>(ctx);
     global::add_pool_flag<X, Y>(global, id);
@@ -18,7 +17,7 @@ public entry fun create_pool<X, Y>(global: &mut Global, ctx: &mut TxContext) {
 
 
 /// add liquidity
-public entry fun add_liquidity<X, Y>(
+public fun add_liquidity<X, Y>(
     pool: &mut Pool<X, Y>,
     coin_x: vector<Coin<X>>,
     coin_y: vector<Coin<Y>>,
@@ -48,7 +47,7 @@ public entry fun add_liquidity<X, Y>(
 }
 
 /// remove liquidit
-public entry fun remove_liquidity<X, Y>(
+public fun remove_liquidity<X, Y>(
     pool: &mut Pool<X, Y>,
     lp: vector<Coin<LPCoin<X, Y>>>,
     lp_amount: u64,
@@ -72,7 +71,7 @@ public entry fun remove_liquidity<X, Y>(
 
 
 /// swap x => y
-public entry fun swap_x_to_y<CoinIn, CoinOut>(pool: &mut Pool<CoinIn, CoinOut>, in: vector<Coin<CoinIn>>, in_amount: u64, min_out: u64, ctx: &mut TxContext) {
+public fun swap_x_to_y<CoinIn, CoinOut>(pool: &mut Pool<CoinIn, CoinOut>, in: vector<Coin<CoinIn>>, in_amount: u64, min_out: u64, ctx: &mut TxContext) {
     let mut in_coin = coin::zero<CoinIn>(ctx);
     pay::join_vec(&mut in_coin, in);
 
@@ -88,7 +87,7 @@ public entry fun swap_x_to_y<CoinIn, CoinOut>(pool: &mut Pool<CoinIn, CoinOut>, 
 
 
 /// swap y => x
-public entry fun swap_y_to_x<CoinIn, CoinOut>(pool: &mut Pool<CoinOut, CoinIn>, in: vector<Coin<CoinIn>>, in_amount: u64, min_out: u64, ctx: &mut TxContext) {
+public fun swap_y_to_x<CoinIn, CoinOut>(pool: &mut Pool<CoinOut, CoinIn>, in: vector<Coin<CoinIn>>, in_amount: u64, min_out: u64, ctx: &mut TxContext) {
     let mut in_coin = coin::zero<CoinIn>(ctx);
     pay::join_vec(&mut in_coin, in);
     let real = coin::split(&mut in_coin, in_amount, ctx);

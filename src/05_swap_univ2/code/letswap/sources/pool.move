@@ -5,9 +5,6 @@ use letswap::events;
 use letswap::global::{Self, Global, get_manager_address};
 use sui::balance::{Self, Balance, Supply};
 use sui::coin::{Self, Coin};
-use sui::object::{Self, UID, ID};
-use sui::transfer;
-use sui::tx_context::{Self, TxContext};
 
 
 const EZeroAmount: u64 = 0;
@@ -39,7 +36,7 @@ public struct Pool<phantom X, phantom Y> has store, key {
 }
 
 
-public entry fun withdraw_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, to: address, amount_x: u64, amount_y: u64, ctx: &mut TxContext) {
+public fun withdraw_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, to: address, amount_x: u64, amount_y: u64, ctx: &mut TxContext) {
     assert!(global::get_withdraw_address(g) == tx_context::sender(ctx), ENotAllow);
 
     let balance_x = balance::split(&mut pool.fee_x, amount_x);
@@ -48,14 +45,14 @@ public entry fun withdraw_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, to: addre
     transfer::public_transfer(coin::from_balance(balance_y, ctx), to);
 }
 
-public entry fun set_dao_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext) {
+public fun set_dao_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext) {
     let sender_address = tx_context::sender(ctx);
     let (manager_address1, manager_address12) = get_manager_address(g) ;
     assert!(manager_address1 == sender_address || manager_address12 == sender_address, ENotAllow);
     pool.dao_fee = fee;
 }
 
-public entry fun set_lp_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext) {
+public fun set_lp_fee<X, Y>(pool: &mut Pool<X, Y>, g: &Global, fee: u64, ctx: &mut TxContext) {
     let sender_address = tx_context::sender(ctx);
     let (manager_address1, manager_address12) = get_manager_address(g) ;
     assert!(manager_address1 == sender_address || manager_address12 == sender_address, ENotAllow);

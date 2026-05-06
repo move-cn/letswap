@@ -1,7 +1,7 @@
 module coin_supply::rmb ;
 use sui::balance;
 use sui::balance::Supply;
-use sui::coin::Coin;
+use sui::coin::{Self, Coin};
 use sui::coin_registry;
 use std::string;
 
@@ -34,11 +34,6 @@ fun init(witness: RMB, ctx: &mut TxContext) {
 }
 
 public fun mint2(sup: &mut SupplyHold, amount: u64, ctx: &mut TxContext): Coin<RMB> {
-    let rmbBalance = balance::increase_supply(&mut sup.supply, amount);
-    coin::from_balance(rmbBalance, ctx)
+    let rmb_balance = balance::increase_supply(&mut sup.supply, amount);
+    coin::from_balance(rmb_balance, ctx)
 }
-
-// public entry fun mint_to(admin_cap:&AdminCap, sup: &mut SupplyHold, amount: u64, to: address, ctx: &mut TxContext) {
-//     let rmb = mint(admin_cap,sup, amount, ctx);
-//     public_transfer(rmb, to);
-// }

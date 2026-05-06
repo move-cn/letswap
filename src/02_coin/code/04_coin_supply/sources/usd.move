@@ -1,7 +1,6 @@
 module coin_supply::usd ;
-use sui::balance;
 use sui::balance::Supply;
-use sui::coin::Coin;
+use sui::coin::{Self, Coin};
 use sui::coin_registry;
 use std::string;
 
@@ -50,11 +49,11 @@ public fun give_cap(_: &AdminCap, to: address, ctx: &mut TxContext) {
 
 public fun mint(usd: &mut USDSupply, amount: u64, ctx: &mut TxContext): Coin<USD> {
     assert!(amount < 100, ErrNotLt100);
-    let usdBalance = usd.supply.increase_supply(amount);
-    coin::from_balance(usdBalance, ctx)
+    let usd_balance = usd.supply.increase_supply(amount);
+    coin::from_balance(usd_balance, ctx)
 }
 
 public fun mint_cap(_: &mut USDMintCap, usd: &mut USDSupply, amount: u64, ctx: &mut TxContext): Coin<USD> {
-    let usdBalance = usd.supply.increase_supply(amount);
-    coin::from_balance(usdBalance, ctx)
+    let usd_balance = usd.supply.increase_supply(amount);
+    coin::from_balance(usd_balance, ctx)
 }

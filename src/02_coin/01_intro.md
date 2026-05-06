@@ -54,7 +54,7 @@ Move 使用"能力"（Abilities）来约束类型的行为。一个结构体可�
 Coin<T>           has key, store       -- 顶层对象，可以在地址间转移
 Balance<T>        has store            -- 非对象，只能作为字段嵌入
 TreasuryCap<T>    has key, store       -- 顶层对象，持有铸造权限
-CoinMetadata<T>   has key, store       -- 顶层对象，存储代币元信息
+Currency registry metadata            -- 当前推荐的代币元信息注册方式
 Supply<T>         has store            -- 非对象，从 TreasuryCap 拆解而来
 Witness (如 HK)   has drop             -- 一次性见证，用完即丢
 ```
@@ -68,22 +68,22 @@ Witness 类型只有 `drop` 能力，确保它在初始化函数中被消费后�
 Sui 的 Coin 标准由四个核心类型组成，它们之间的关系如下：
 
 ```
-               coin::create_currency()
+      coin_registry::new_currency_with_otw()
                        |
                        v
-        +--------------+---------------+
-        |                              |
-  TreasuryCap<T>               CoinMetadata<T>
-  (铸造权限)                    (代币元信息)
-        |                              |
-        |   coin::mint()               |
-        v                              |
-     Coin<T>                           |
-     (代币对象)                         |
-        |                              |
-        |   coin::into_balance()       |
-        v                              |
-     Balance<T>                 (冻结为不可变对象)
+        +--------------+---------------------+
+        |                                    |
+  TreasuryCap<T>                    CurrencyInitializer<T>
+  (铸造权限)                         (注册元信息的临时初始化器)
+        |                                    |
+        | coin::mint()                      | finalize
+        v                                    v
+     Coin<T>                         Currency registry metadata
+     (代币对象)                       (链上元信息)
+        |
+        | coin::into_balance()
+        v
+     Balance<T>
      (余额数值)
 ```
 

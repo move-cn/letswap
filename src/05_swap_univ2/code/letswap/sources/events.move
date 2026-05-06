@@ -1,9 +1,9 @@
+#[allow(deprecated_usage)]
 module letswap::events ;
 use std::ascii::String;
 use std::type_name::{into_string, get};
 
 use sui::event;
-use sui::object::ID;
 
 
 public struct CreatePoolEvent has drop, copy {

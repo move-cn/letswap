@@ -1,4 +1,5 @@
 /// auto amm x * y = k
+#[allow(deprecated_usage)]
 module letswap::amm_core ;
 use letswap::constants::{get_fee_base_of_percentage, get_min_lp_value};
 use sui::math::{Self, sqrt_u128};
@@ -57,17 +58,17 @@ public fun get_no_loss_values(
     reserves_y: u64
 ): (u64, u64) {
     if (reserves_x == 0 && reserves_y == 0) {
-        return (x_desired, y_desired)
+        (x_desired, y_desired)
     } else {
         let y_returned = convert_current_price(x_desired, reserves_x, reserves_y);
         if (y_returned <= y_desired) {
             assert!(y_returned >= y_min, ERR_INSUFFICIENT_Y_AMOUNT);
-            return (x_desired, y_returned)
+            (x_desired, y_returned)
         } else {
             let x_returned = convert_current_price(y_desired, reserves_y, reserves_x);
             assert!(x_returned <= x_desired, ERR_OVERLIMIT_X);
             assert!(x_returned >= x_min, ERR_INSUFFICIENT_X_AMOUNT);
-            return (x_returned, y_desired)
+            (x_returned, y_desired)
         }
     }
 }
